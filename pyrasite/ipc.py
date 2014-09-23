@@ -157,6 +157,10 @@ class PyrasiteIPC(object):
     def inject(self):
         """Inject the payload into the process."""
         filename = self.create_payload()
+        if os.geteuid() == 0:
+            puid = os.stat("/proc/%d" % self.pid).st_uid
+            if puid != 0:
+                os.chown(filename, puid, -1)
         pyrasite.inject(self.pid, filename)
         os.unlink(filename)
 
